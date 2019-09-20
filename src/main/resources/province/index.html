@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>全国地区多级联动jQuery插件</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/thr-linkage.css">
+    <script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+
+</head>
+
+<body>
+<br>
+<div class="form-div" style="text-align: center;">
+
+    <input type="button" value="示例1：地区三级联动" id="thisBind1">
+    <br>
+    <br>
+    <textarea rows="5" cols="50" id="textArea">110100,120100</textarea>
+    <input type="button" value="示例2：地区二级联动" id="thisBind2">
+    <br>
+    <br>
+    <input type="button" value="示例3：注入默认选中项" id="thisBind3">
+</div>
+
+
+<!-- 请在html加载完成后引入插件 -->
+<script type="text/javascript" src="js/thr-linkage-1.0.js"></script>
+<script type="text/javascript" src="js/areaData.js"></script>
+<script type="text/javascript">
+    $(function () {
+        var thisThr1 = $.linkAgeInit({
+            shade: 0.4,
+            dataIndex: 3,
+            dataModel: 'data',
+            dataSource: app_area_data,
+            showSelectHtml: '<li data-id="{code}" data-route="{route}" class="">{area}</li>',
+            showCheckHtml: '<dd data-id="{code}" data-route="{route}" class="{_on_}">{area}</dd>',
+            dataOnePid: 1,
+            dataIdKey: 'code',
+            closeCallBack: function (data) {
+                console.log('你点击了关闭！', data);
+            },
+            confirmCallBack: function (data) {
+                console.log('你点击了确定！', data);
+            }
+        });
+
+        var thisThr2 = $.linkAgeInit({
+            shade: 0.4,
+            dataIndex: 2,
+            dataModel: 'data',
+            dataSource: app_area_data,
+            showSelectHtml: '<li data-id="{code}" data-route="{route}" class="">{area}</li>',
+            showCheckHtml: '<dd data-id="{code}" data-route="{route}" class="{_on_}">{area}</dd>',
+            dataOnePid: 1,
+            dataIdKey: 'code',
+            closeCallBack: function (data) {
+                console.log('你点击了关闭！', data);
+
+            },
+            confirmCallBack: function (data) {
+                console.log('你点击了确定！', data);
+                console.log(data.length);
+                var resultTxt = "";
+                for (var i = 0; i < data.length; i++) {
+                    console.log(data[i]);
+                    if (i === data.length - 1) {
+                        resultTxt += data[i].id;
+                    } else {
+                        resultTxt += data[i].id + ",";
+                    }
+                }
+                console.log(resultTxt);
+                $("#textArea").val(resultTxt);
+            }
+        });
+
+        $("#thisBind1").click(function () {
+            thisThr1.open('.form-div');
+        });
+        $("#thisBind2").click(function () {
+            var ids=$("#textArea").val();
+            thisThr2.set(findInfo(ids));
+            thisThr2.open('.form-div');
+
+        });
+        $("#thisBind3").click(function () {
+            thisThr1.set(findInfo(ids));
+            thisThr1.open('.form-div');
+        })
+    });
+
+    function findInfo(ids) {
+        console.log("ids:" + ids);
+        var idArray = ids.split(",");
+        console.log("idArray:" + idArray);
+        console.log("idArray.length:" + idArray.length);
+        var result = "";
+        if (idArray.length > 0) {
+            result += "[";
+            for (var i = 0; i < idArray.length; i++) {
+                console.log("i:" + i);
+                var area = getArea(idArray[i]);
+                console.log("area:" + area);
+                if (i === (idArray.length - 1)) {
+                    result += "{id:" + idArray[i] + ", name:'" + area + "'}";
+                } else {
+                    result += "{id:" + idArray[i] + ", name:'" + area + "'},";
+                }
+            }
+            result += "]";
+        }
+        console.log("result:" + result);
+        return eval("(" + result + ")");
+    }
+
+    function getArea(id) {
+        for (var i in app_area_data) {
+            for (var j in app_area_data[i]) {
+                if (app_area_data[i][j].code == id) {
+                    return app_area_data[i][j].area;
+                }
+            }
+        }
+    }
+</script>
+</body>
+
+</html>
+<!--下面是无用代码-->
+<a style="display:none" href="http://www.bootstrapmb.com">bootstrap模板库</a>
+<!--上面是无用代码-->

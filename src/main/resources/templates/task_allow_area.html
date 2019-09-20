@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>首页</title>
+    <link th:href="@{/css/style.css}" rel="stylesheet" media="screen"/>
+    <link th:href="@{/css/thr-linkage.css}" rel="stylesheet" media="screen"/>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet" media="screen"/>
+    <link th:href="@{/css/bootstrap-datetimepicker.min.css}" rel="stylesheet" media="screen"/>
+    <script th:src="@{/js/bootstrap.min.js}"></script>
+</head>
+
+<body>
+<nav class="navbar navbar-inverse navbar-default" role="navigation" id="top" th:include="menu_top :: menu_top"></nav>
+<div class="form-div" style="text-align: center;">
+    <label th:text="${task.taskName}"></label>开通区域<br/>
+    <input type="hidden" class="inp w240" id="id" name="id" th:value="${task.id}"/>
+    <input type="hidden" class="inp w240" id="moduleId" name="moduleId" th:value="${task.module.id}"/>
+    <textarea id="allowArea" name="detail" rows="5" cols="100" th:text="${task.allowArea}"></textarea>
+    <br/>
+    <input type="button" value="点击选择地市" id="allowAreaBtn">
+    <input type="button" value="保存" onclick="saveArea()" id="saveBtn">
+    <input type="button" value="返回" onclick="javascript:window.history.back();" id="backBtn">
+</div>
+<script th:src="@{/js/thr-linkage-1.0.js}"></script>
+<script th:src="@{/js/areaData.js}"></script>
+<script type="text/javascript">
+    $(function () {
+        var allowArea = $.linkAgeInit({
+            shade: 0.4,
+            dataIndex: 2,
+            dataModel: 'data',
+            dataSource: app_area_data,
+            showSelectHtml: '<li data-id="{code}" data-route="{route}" class="">{area}</li>',
+            showCheckHtml: '<dd data-id="{code}" data-route="{route}" class="{_on_}">{area}</dd>',
+            dataOnePid: 1,
+            dataIdKey: 'code',
+            closeCallBack: function (data) {
+                console.log('你点击了关闭！', data);
+            },
+            confirmCallBack: function (data) {
+                console.log('你点击了确定！', data);
+                console.log(data.length);
+                var resultTxt = "";
+                for (var i = 0; i < data.length; i++) {
+                    console.log(data[i]);
+                    if (i === data.length - 1) {
+                        resultTxt += data[i].id;
+                    } else {
+                        resultTxt += data[i].id + ",";
+                    }
+                }
+                console.log(resultTxt);
+                $("#allowArea").val(resultTxt);
+            }
+        });
+        $("#allowAreaBtn").click(function () {
+            console.log("点击按钮");
+            var ids = $("#allowArea").val();
+            console.log(ids);
+            if (ids) {
+                allowArea.set(findInfo(ids));
+            }
+            allowArea.open('.form-div');
+
+        });
+    });
+
+    function findInfo(ids) {
+        console.log("ids:" + ids);
+        var idArray = ids.split(",");
+        console.log("idArray:" + idArray);
+        console.log("idArray.length:" + idArray.length);
+        var result = "";
+        if (idArray.length > 0) {
+            result += "[";
+            for (var i = 0; i < idArray.length; i++) {
+                console.log("i:" + i);
+                var area = getArea(idArray[i]);
+                console.log("area:" + area);
+                if (i === (idArray.length - 1)) {
+                    result += "{id:" + idArray[i] + ", name:'" + area + "'}";
+                } else {
+                    result += "{id:" + idArray[i] + ", name:'" + area + "'},";
+                }
+            }
+            result += "]";
+        }
+        console.log("result:" + result);
+        return eval("(" + result + ")");
+    }
+
+    function getArea(id) {
+        for (var i in app_area_data) {
+            for (var j in app_area_data[i]) {
+                if (app_area_data[i][j].code == id) {
+                    return app_area_data[i][j].area;
+                }
+            }
+        }
+    }
+
+    function saveArea() {
+        $.post("/task/server/task/saveArea", {
+            "id": $("#id").val(),
+            "area": $("#allowArea").val(),
+            "type": 1
+        }, function (data) {
+            if (data.resultCode == "SUCCESS") {
+                //保存成功
+                window.location.href = "/task/server/task/list?moduleId=" + $("#moduleId").val();
+            } else {
+                //保存失败
+                $("#detailMsg").html(data.resultMsg);
+                $("#detailMsg").show();
+            }
+        }, "json")
+    }
+</script>
+</body>
+</html>

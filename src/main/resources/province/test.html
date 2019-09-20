@@ -1,0 +1,65 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>全国地区多级联动jQuery插件</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/thr-linkage.css">
+    <script type="text/javascript" src="js/jquery-2.1.0.min.js"></script>
+
+</head>
+
+<body>
+    <br>
+    <div class="form-div" style="text-align: center;">
+
+        <input type="button" value="示例1：地区三级联动" id="thisBind1">
+        <br>
+        <br>
+        <input type="button" value="示例2：地区二级联动" id="thisBind2">
+        <br>
+        <br>
+        <input type="button" value="示例3：注入默认选中项" id="thisBind3">
+        <br>
+        <br>
+        <input type="button" value="保存为文本" id="thisBind4" onclick="saveFile()">
+    </div>
+</body>
+<script type="text/javascript" src="js/areaData.js"></script>
+<script>
+    // console.log(app_area_data);
+    var text = "";
+
+    for (var i in app_area_data) {
+        for (var j in app_area_data[i]) {
+            text += "insert into t_area values(" + app_area_data[i][j].code + ",'" + app_area_data[i][j].area + "'," +
+                i + ",1,null,null);\n";
+        }
+    }
+
+    console.log(text);
+
+    function fakeClick(obj) {
+        var ev = document.createEvent("MouseEvents");
+        ev.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+        obj.dispatchEvent(ev);
+    }
+
+
+    function exportRaw(name, data) {
+        var urlObject = window.URL || window.webkitURL || window;
+        var export_blob = new Blob([data]);
+        var save_link = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+        save_link.href = urlObject.createObjectURL(export_blob);
+        save_link.download = name;
+        fakeClick(save_link);
+    }
+
+    function saveFile() {
+        exportRaw('test.sql', text);
+    }
+</script>
+
+</html>
